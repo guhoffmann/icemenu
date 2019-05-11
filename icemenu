@@ -1,0 +1,271 @@
+#!/usr/bin/lua
+
+local appname = "Icemenu 19.5.10"
+local iconDirs = {
+	"/usr/share/icons/gnome/32x32/", "/usr/share/icons/gnome/48x48/",
+	"/usr/share/icons/hicolor/32x32/", "/usr/share/icons/hicolor/48x48/",
+	"/usr/share/icons/hicolor/64x64/", "/usr/share/icons/Mint-Y/apps/32/",
+	"/usr/share/pixmaps", "/usr/share/games", "/usr/share/icons/hicolor/48x48/apps",
+	"/usr/share/app-install/icons", "/usr/share/icons/Mint-X/apps/32/",
+	"/usr/share/icons/hicolor/scalable"
+}
+local iconTable = {}
+local terminal = "gnome-terminal -- "
+local par = arg[1]
+
+-- return table with lines of shell command output ----------------------------
+
+function shellTable(command)
+	local lines = {}
+   local file = io.popen(command,"r")
+	for line in file:lines() do
+	   table.insert(lines,line)
+	end
+   file:close()
+	return lines
+end -- of shell(command)
+
+-- merge 2 tables -------------------------------------------------------------
+
+function table.merge(t1, t2)
+   for k,v in ipairs(t2) do
+      table.insert(t1, v)
+   end
+   return t1
+end
+
+-- test if file exists --------------------------------------------------------
+
+function fileExists(name)
+   local f = io.open(name,"r")
+   if f ~= nil then io.close(f) return true else return false end
+end
+
+-- read all icons into table --------------------------------------------------
+
+function readIcons()
+	for i,v in ipairs(iconDirs) do
+		table.merge(iconTable, shellTable("find "..v.." -name *.png"))
+		table.merge(iconTable, shellTable("find "..v.." -name *.xpm"))
+		table.merge(iconTable, shellTable("find "..v.." -name *.svg"))
+	end -- of for i,v ...
+end
+
+-- find an icon ---------------------------------------------------------------
+
+function findIcon(iconName)
+	if iconName ~= nil then 
+		-- first: test if icon given with full url can be found
+		if fileExists(iconName)	then
+			return iconName
+		-- if not found then search in iconTable for icon
+		else
+			for i,v in ipairs(iconTable) do
+				if string.find(v,iconName,1,true) then
+					return v end
+			end
+		end
+	end
+	-- return this if nothing is found!
+	return " -- "
+end
+
+-- check for categories -------------------------------------------------------
+
+function checkCategories(checkString, categories)
+	for i in string.gmatch(categories, "|") do
+   	if string.match(checkString,i) then
+			return true
+		end
+	end
+	return false
+end
+
+-- search appTable for line containing expression -----------------------------
+
+function lineSearch( searchTable, searchString)
+	local val
+	for i,v in ipairs(searchTable) do
+		val = string.match(v, searchString)
+		if val ~= nil then return val end
+	end
+	return "nix"
+end
+
+--[[ check string for different strings separated by | --------------------------
+	if not all are present, return "false", this gives logical "and"! ]]
+
+function checkString(stringVal, compVal)
+	for v in string.gmatch(compVal,"[^|]+") do
+		if not string.match(stringVal,v) then return false end
+	end
+	return true
+end
+
+-- search items for menu ------------------------------------------------------
+
+function menuItems(appTable, categories)
+
+	-- iterate over apps table
+
+	for i,appEntry in ipairs(appTable) do
+
+		local categoryEntry = lineSearch(appEntry,"Categories=.*$")
+
+		if checkString(categoryEntry, categories.."|") then
+
+			local name = lineSearch(appEntry,"Name.de.=.*$")
+			if name == "nix" then
+				name = lineSearch(appEntry, "Name=.*$" )
+			end
+			name = string.match(name,"=(.*)")
+			local comment
+			-- read comment if parameter -c or c is given only!
+			if par == "c" or par == "-c" then
+				comment = lineSearch(appEntry,"Comment.de.=.*$")
+				if comment == "nix" then
+					comment = lineSearch(appEntry, "Comment=.*$" )
+				end
+				if comment == "nix" then comment = ""
+				else	comment = " - "..string.match(comment,"=(.*)")
+				end
+			else comment = ""
+			end
+			local exec = lineSearch(appEntry, "Exec=.*$") 
+			exec = string.match(exec, "Exec=(.*)")
+			exec = exec:gsub("%%.","")
+			local icon = lineSearch(appEntry, "Icon=.*$")
+			local terminalTrue = lineSearch(appEntry, "Terminal=.*$")
+			local iconFound = findIcon(string.match(icon, "Icon=(.*)"))
+			if terminalTrue == "Terminal=true" then
+				print("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec)
+			else
+				print("   prog \""..name..comment.."\" "..iconFound.." "..exec)
+			end
+
+		end -- of if checkString ...
+	end -- of for i,app ...
+
+end
+
+function menuStart(menuTitle, menuIcon)
+	print("menu \""..menuTitle.."\" "..findIcon(menuIcon).." {")
+end
+-- main part ------------------------------------------------------------------
+
+local apps = {}
+for i,v in ipairs(shellTable("ls /usr/share/applications/*.desktop")) do
+	table.insert(apps, shellTable("cat "..v))
+end
+
+readIcons()
+
+-- Menu Beenden
+print("menu \"Beenden...\" /usr/share/icons/gnome/32x32/actions/exit.png  {")
+print("	prog \"Abmelden\" /usr/share/icons/gnome/32x32/actions/gnome-logout.png yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
+print("	prog \"Neustart\" /usr/share/icons/gnome/32x32/actions/reload.png yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
+print("	prog \"Ausschalten\" /usr/share/icons/gnome/32x32/actions/gnome-shutdown.png yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+print("}")
+print("separator")
+print("prog \"Terminal\" "..findIcon("konsole").." x-terminal-emulator")
+print("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder")
+print("separator")
+
+-- Entwicklung
+menuStart("Entwicklung", "package_development")
+	menuItems(apps, "Development")
+print("}")
+
+-- Grafik
+menuStart("Grafik", "package_graphics")
+	menuItems(apps, "Graphics")
+print("}")
+
+-- Spiele
+menuStart("Spiele", "package_games")
+	menuItems(apps, "Game")
+print("}")
+
+-- Multimedia/Audio/Video
+menuStart("Multimedia", "package_multimedia")
+	menuItems(apps, "AudioVideo")
+print("}")
+
+-- Office
+menuStart("Büro", "package_office")
+	menuItems(apps, "Office")
+print("}")
+
+-- Wissenschaft
+menuStart("Wissenschaft", "applications-science")
+	menuItems(apps, "Science")
+print("}")
+
+-- Erziehung
+menuStart("Erziehung", "applications-education")
+	menuItems(apps, "Science")
+print("}")
+
+-- Netzwerk
+menuStart("Netzwerk", "nm-device-wireless")
+	menuItems(apps, "Network")
+print("}")
+
+-- Einstellungen
+menuStart("Einstellungen", "preferences-other")
+	menuStart("Desktop", "preferences-desktop-personal")
+		menuItems(apps, "DesktopSettings")
+	print("}")
+	menuStart("Hardware", "preferences-desktop-peripherals")
+		menuItems(apps, "HardwareSettings")
+	print("}")
+
+	menuStart("Alle", "preferences-other")
+		menuItems(apps, "Settings")
+	print("}")
+print("}")
+
+-- System
+menuStart("System", "preferences-system-network")
+	print("prog \"Midnight-Commander\" "..findIcon("MidnightCommander").." x-terminal-emulator -e mc")
+	print("prog \"Pcmanfm-Dateimanager\" "..findIcon("system-file-manager").." pcmanfm")
+	print("prog \"Thunar-Dateimanager\" "..findIcon("thunar").." thunar")
+	print("prog \"Druckerkonfiguration\" "..findIcon("printer").." system-config-printer")
+
+	print("separator")
+	print("prog \"Sofware-Manager\" "..findIcon("mintinstall").." mintinstall")
+	print("prog \"Update-Manager\" "..findIcon("mintupdate").." mintupdate")
+	print("prog \"Synaptic-Paketmanager\" "..findIcon("synaptic").." synaptic-pkexec")
+	print("separator")
+	menuStart("Dateisystem", "drive-multidisk")
+		menuItems(apps, "Filesystem")	
+		menuItems(apps, "FileTools")
+--		menuItems(apps, "FileManager")
+	print("}")
+
+	menuStart("Sicherheit/Monitoring", "security-high")
+		menuItems(apps, "Monitor")
+		menuItems(apps, "Security")
+	print("}")
+
+	menuStart("Terminals", "konsole")
+		menuItems(apps, "TerminalEmulator")
+	print("}")
+	menuStart("Alle", "preferences-system-network")
+		menuItems(apps, "System")
+	print("}")
+print("}")
+
+-- Werkzeuge
+menuStart("Werkzeuge", "gnome-util")
+	menuItems(apps, "Accessiblility")
+	menuItems(apps, "Archiving")
+	menuItems(apps, "Calculator")
+	menuItems(apps, "Clock")
+	menuItems(apps, "TextEditor")
+	menuItems(apps, "TextTools")
+	menuStart("Alle", "gnome-util")
+		menuItems(apps, "Utility")
+	print("}")
+print("}")
+

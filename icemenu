@@ -9,7 +9,7 @@ local iconDirs = {
 	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable"
 }
 local iconTable = {}
-local terminal = "gnome-terminal -- "
+local terminal = "x-terminal-emulator -e "
 local par = arg[1]
 
 -- return table with lines of shell command output ----------------------------
@@ -70,17 +70,6 @@ function findIcon(iconName)
 	return " -- "
 end
 
--- check for categories -------------------------------------------------------
-
-function checkCategories(checkString, categories)
-	for i in string.gmatch(categories, "|") do
-   	if string.match(checkString,i) then
-			return true
-		end
-	end
-	return false
-end
-
 -- search appTable for line containing expression -----------------------------
 
 function lineSearch( searchTable, searchString)
@@ -96,10 +85,12 @@ end
 	if not all are present, return "false", this gives logical "and"! ]]
 
 function checkString(stringVal, compVal)
-	for v in string.gmatch(compVal,"[^|]+") do
-		if not string.match(stringVal,v) then return false end
+	for v in string.gmatch(compVal,"%S+") do
+		if string.match(stringVal,v) ~= nil then
+			return true
+		end
 	end
-	return true
+	return false
 end
 
 -- search items for menu ------------------------------------------------------
@@ -111,8 +102,8 @@ function menuItems(appTable, categories)
 	for i,appEntry in ipairs(appTable) do
 
 		local categoryEntry = lineSearch(appEntry,"Categories=.*$")
-
-		if checkString(categoryEntry, categories.."|") then
+	--	print("***"..categoryEntry.."***"..categories.."***"..lineSearch(appEntry,"Exec=.*$") )
+		if checkString(categoryEntry, categories) then
 
 			local name = lineSearch(appEntry,"Name.de.=.*$")
 			if name == "nix" then
@@ -165,6 +156,9 @@ print("menu \"Beenden...\" /usr/share/icons/gnome/32x32/actions/exit.png  {")
 print("	prog \"Abmelden\" /usr/share/icons/gnome/32x32/actions/gnome-logout.png yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
 print("	prog \"Neustart\" /usr/share/icons/gnome/32x32/actions/reload.png yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
 print("	prog \"Ausschalten\" /usr/share/icons/gnome/32x32/actions/gnome-shutdown.png yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+-- Puppy specific!!
+print("	prog \"Neustart\" /usr/share/pixmaps/puppy/cancel.svg /sbin/reboot")
+print("	prog \"Ausschalten\" -- /sbin/poweroff")
 print("}")
 print("separator")
 print("prog \"Terminal\" "..findIcon("konsole").." x-terminal-emulator")
@@ -210,6 +204,7 @@ print("}")
 -- Netzwerk
 menuStart("Netzwerk", "nm-device-wireless")
 	menuItems(apps, "Network")
+	menuItems(apps,"WebBrowser")
 print("}")
 
 -- Einstellungen
@@ -220,9 +215,8 @@ menuStart("Einstellungen", "preferences-other")
 	menuStart("Hardware", "preferences-desktop-peripherals")
 		menuItems(apps, "HardwareSettings")
 	print("}")
-
 	menuStart("Alle", "preferences-other")
-		menuItems(apps, "Settings")
+		menuItems(apps, "Settings X%-Setup%-puppy")
 	print("}")
 print("}")
 
@@ -250,7 +244,7 @@ menuStart("System", "preferences-system-network")
 	print("}")
 
 	menuStart("Terminals", "konsole")
-		menuItems(apps, "TerminalEmulator")
+		menuItems(apps, "TerminalEmulator X%-Utility%-shell")
 	print("}")
 	menuStart("Alle", "preferences-system-network")
 		menuItems(apps, "System")

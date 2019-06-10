@@ -2,11 +2,12 @@
 
 local appname = "Icemenu 19.5.10"
 local iconDirs = {
-	"/usr/share/icons/gnome/32x32/", "/usr/share/icons/gnome/48x48/",
+	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
 	"/usr/share/icons/hicolor/64x64/", "/usr/share/icons/Mint-Y/apps/32/",
 	"/usr/share/pixmaps", "/usr/share/games", "/usr/share/app-install/icons",
-	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable"
+	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
+	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
 }
 local iconTable = {}
 local terminal = "x-terminal-emulator -e "
@@ -55,19 +56,18 @@ end
 function findIcon(iconName)
 	if iconName ~= nil then 
 		-- first: test if icon given with full url can be found
-		if fileExists(iconName) and string.match(iconName,".png")	then
+		if fileExists(iconName) and string.match(iconName,".png") then
 			return iconName
 		-- if not found then search in iconTable for icon
 		else
 			for i,v in ipairs(iconTable) do
-				if string.find(v,iconName,1,true) then
+				if string.find(v,iconName,1,true) and string.match(v,".png") then
 				return v end
 			end
 		end
 	end
-
 	-- return this if nothing is found!
-	return " -- "
+	return " /usr/share/icons/gnome/32x32/actions/gnome-run.png "
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -152,16 +152,16 @@ end
 readIcons()
 
 -- Menu Beenden
-print("menu \"Beenden...\" /usr/share/icons/gnome/32x32/actions/exit.png  {")
-print("	prog \"Abmelden\" /usr/share/icons/gnome/32x32/actions/gnome-logout.png yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
-print("	prog \"Neustart\" /usr/share/icons/gnome/32x32/actions/reload.png yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
-print("	prog \"Ausschalten\" /usr/share/icons/gnome/32x32/actions/gnome-shutdown.png yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
+print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
+print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
+print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
 -- Puppy specific!!
-print("	prog \"Neustart\" /usr/share/pixmaps/puppy/cancel.svg /sbin/reboot")
-print("	prog \"Ausschalten\" -- /sbin/poweroff")
+print("	prog \"Neustart\" "..findIcon("reload").." /sbin/reboot")
+print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
 print("}")
 print("separator")
-print("prog \"Terminal\" "..findIcon("konsole").." x-terminal-emulator")
+print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
 print("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder")
 print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
 print("separator")
@@ -264,6 +264,6 @@ menuStart("Werkzeuge", "gnome-util")
 	print("}")
 print("}")
 
---[[ for i,v in ipairs(iconTable) do
-	print(v)
-end ]]
+--for i,v in ipairs(iconTable) do
+--	io.stderr:write(v)
+--end

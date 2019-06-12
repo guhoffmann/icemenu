@@ -2,14 +2,15 @@
 
 local appname = "Icemenu 19.5.10"
 local iconDirs = {
-	"/usr/share/icons/gnome/32x32/", "/usr/share/icons/gnome/48x48/",
+	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
 	"/usr/share/icons/hicolor/64x64/", "/usr/share/icons/Mint-Y/apps/32/",
 	"/usr/share/pixmaps", "/usr/share/games", "/usr/share/app-install/icons",
-	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable"
+	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
+	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
 }
 local iconTable = {}
-local terminal = "gnome-terminal -- "
+local terminal = "x-terminal-emulator -e "
 local par = arg[1]
 
 -- return table with lines of shell command output ----------------------------
@@ -55,30 +56,18 @@ end
 function findIcon(iconName)
 	if iconName ~= nil then 
 		-- first: test if icon given with full url can be found
-		if fileExists(iconName) and string.match(iconName,".png")	then
+		if fileExists(iconName) and string.match(iconName,".png") then
 			return iconName
 		-- if not found then search in iconTable for icon
 		else
 			for i,v in ipairs(iconTable) do
-				if string.find(v,iconName,1,true) then
+				if string.find(v,iconName,1,true) and string.match(v,".png") then
 				return v end
 			end
 		end
 	end
-
 	-- return this if nothing is found!
-	return " -- "
-end
-
--- check for categories -------------------------------------------------------
-
-function checkCategories(checkString, categories)
-	for i in string.gmatch(categories, "|") do
-   	if string.match(checkString,i) then
-			return true
-		end
-	end
-	return false
+	return " /usr/share/icons/gnome/32x32/actions/gnome-run.png "
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -96,10 +85,12 @@ end
 	if not all are present, return "false", this gives logical "and"! ]]
 
 function checkString(stringVal, compVal)
-	for v in string.gmatch(compVal,"[^|]+") do
-		if not string.match(stringVal,v) then return false end
+	for v in string.gmatch(compVal,"%S+") do
+		if string.match(stringVal,v) ~= nil then
+			return true
+		end
 	end
-	return true
+	return false
 end
 
 -- search items for menu ------------------------------------------------------
@@ -111,8 +102,8 @@ function menuItems(appTable, categories)
 	for i,appEntry in ipairs(appTable) do
 
 		local categoryEntry = lineSearch(appEntry,"Categories=.*$")
-
-		if checkString(categoryEntry, categories.."|") then
+	--	print("***"..categoryEntry.."***"..categories.."***"..lineSearch(appEntry,"Exec=.*$") )
+		if checkString(categoryEntry, categories) then
 
 			local name = lineSearch(appEntry,"Name.de.=.*$")
 			if name == "nix" then
@@ -161,13 +152,16 @@ end
 readIcons()
 
 -- Menu Beenden
-print("menu \"Beenden...\" /usr/share/icons/gnome/32x32/actions/exit.png  {")
-print("	prog \"Abmelden\" /usr/share/icons/gnome/32x32/actions/gnome-logout.png yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
-print("	prog \"Neustart\" /usr/share/icons/gnome/32x32/actions/reload.png yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
-print("	prog \"Ausschalten\" /usr/share/icons/gnome/32x32/actions/gnome-shutdown.png yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
+print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
+print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
+print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+-- Puppy specific!!
+print("	prog \"Neustart\" "..findIcon("reload").." /sbin/reboot")
+print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
 print("}")
 print("separator")
-print("prog \"Terminal\" "..findIcon("konsole").." x-terminal-emulator")
+print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
 print("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder")
 print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
 print("separator")
@@ -179,7 +173,7 @@ print("}")
 
 -- Grafik
 menuStart("Grafik", "package_graphics")
-	menuItems(apps, "Graphics")
+	menuItems(apps, "Graphics X-GraphicUtility")
 print("}")
 
 -- Spiele
@@ -189,7 +183,7 @@ print("}")
 
 -- Multimedia/Audio/Video
 menuStart("Multimedia", "package_multimedia")
-	menuItems(apps, "AudioVideo")
+	menuItems(apps, "AudioVideo Video Audio")
 print("}")
 
 -- Office
@@ -209,7 +203,7 @@ print("}")
 
 -- Netzwerk
 menuStart("Netzwerk", "nm-device-wireless")
-	menuItems(apps, "Network")
+	menuItems(apps, "Network WebBrowser X-Internet")
 print("}")
 
 -- Einstellungen
@@ -220,9 +214,8 @@ menuStart("Einstellungen", "preferences-other")
 	menuStart("Hardware", "preferences-desktop-peripherals")
 		menuItems(apps, "HardwareSettings")
 	print("}")
-
 	menuStart("Alle", "preferences-other")
-		menuItems(apps, "Settings")
+		menuItems(apps, "Settings X%-Setup%-puppy")
 	print("}")
 print("}")
 
@@ -250,7 +243,7 @@ menuStart("System", "preferences-system-network")
 	print("}")
 
 	menuStart("Terminals", "konsole")
-		menuItems(apps, "TerminalEmulator")
+		menuItems(apps, "TerminalEmulator X%-Utility%-shell")
 	print("}")
 	menuStart("Alle", "preferences-system-network")
 		menuItems(apps, "System")
@@ -270,6 +263,6 @@ menuStart("Werkzeuge", "gnome-util")
 	print("}")
 print("}")
 
---[[ for i,v in ipairs(iconTable) do
-	print(v)
-end ]]
+--for i,v in ipairs(iconTable) do
+--	io.stderr:write(v)
+--end

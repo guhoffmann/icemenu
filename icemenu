@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.5.10"
+local appname = "Icemenu 19.6.12"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -154,11 +154,14 @@ readIcons()
 -- Menu Beenden
 print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
 print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
-print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
-print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
--- Puppy specific!!
-print("	prog \"Neustart\" "..findIcon("reload").." /sbin/reboot")
-print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
+if fileExists("/sbin/reboot") then 
+	print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
+end
+if fileExists("/sbin/poweroff") then 
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
+else
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+end
 print("}")
 print("separator")
 print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))

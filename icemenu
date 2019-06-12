@@ -12,6 +12,7 @@ local iconDirs = {
 local iconTable = {}
 local terminal = "x-terminal-emulator -e "
 local par = arg[1]
+local outfile
 
 -- return table with lines of shell command output ----------------------------
 
@@ -102,7 +103,7 @@ function menuItems(appTable, categories)
 	for i,appEntry in ipairs(appTable) do
 
 		local categoryEntry = lineSearch(appEntry,"Categories=.*$")
-	--	print("***"..categoryEntry.."***"..categories.."***"..lineSearch(appEntry,"Exec=.*$") )
+	--	outfile:write("***"..categoryEntry.."***"..categories.."***"..lineSearch(appEntry,"Exec=.*$") )
 		if checkString(categoryEntry, categories) then
 
 			local name = lineSearch(appEntry,"Name.de.=.*$")
@@ -129,9 +130,9 @@ function menuItems(appTable, categories)
 			local terminalTrue = lineSearch(appEntry, "Terminal=.*$")
 			local iconFound = findIcon(string.match(icon, "Icon=(.*)"))
 			if terminalTrue == "Terminal=true" then
-				print("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec)
+				outfile:write("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec.."\n")
 			else
-				print("   prog \""..name..comment.."\" "..iconFound.." "..exec)
+				outfile:write("   prog \""..name..comment.."\" "..iconFound.." "..exec.."\n")
 			end
 
 		end -- of if checkString ...
@@ -140,9 +141,13 @@ function menuItems(appTable, categories)
 end
 
 function menuStart(menuTitle, menuIcon)
-	print("menu \""..menuTitle.."\" "..findIcon(menuIcon).." {")
+	outfile:write("menu \""..menuTitle.."\" "..findIcon(menuIcon).." {\n")
 end
+
 -- main part ------------------------------------------------------------------
+
+io.stderr:write("Starting...")
+outfile=io.output(arg[1])
 
 local apps = {}
 for i,v in ipairs(shellTable("ls /usr/share/applications/*.desktop")) do
@@ -152,104 +157,103 @@ end
 readIcons()
 
 -- Menu Beenden
-print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
-print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
-print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
-print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+outfile:write("menu \"Beenden...\" "..findIcon("exit.png").."  {\n")
+outfile:write("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"\n")
+outfile:write("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"\n")
+outfile:write("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"\n")
 -- Puppy specific!!
-print("	prog \"Neustart\" "..findIcon("reload").." /sbin/reboot")
-print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
-print("}")
-print("separator")
-print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
-print("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder")
-print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
-print("separator")
+outfile:write("	prog \"Neustart\" "..findIcon("reload").." /sbin/reboot\n")
+outfile:write("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff\n")
+outfile:write("}\n")
+outfile:write("separator\n")
+outfile:write("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal\n");--io.stderr:write("Gefunden: "..findIcon("reload"))
+outfile:write("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder\n")
+outfile:write("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." icemenu \"/root/.icewm/menu\"")
+outfile:write("separator\n")
 
 -- Entwicklung
 menuStart("Entwicklung", "package_development")
 	menuItems(apps, "Development")
-print("}")
+outfile:write("}\n")
 
 -- Grafik
 menuStart("Grafik", "package_graphics")
-	menuItems(apps, "Graphics")
-print("}")
+	menuItems(apps, "Graphics X-GraphicUtility")
+outfile:write("}\n")
 
 -- Spiele
 menuStart("Spiele", "package_games")
 	menuItems(apps, "Game")
-print("}")
+outfile:write("}\n")
 
 -- Multimedia/Audio/Video
 menuStart("Multimedia", "package_multimedia")
-	menuItems(apps, "AudioVideo")
-print("}")
+	menuItems(apps, "AudioVideo Video Audio")
+outfile:write("}\n")
 
 -- Office
 menuStart("Büro", "package_office")
 	menuItems(apps, "Office")
-print("}")
+outfile:write("}\n")
 
 -- Wissenschaft
 menuStart("Wissenschaft", "applications-science")
 	menuItems(apps, "Science")
-print("}")
+outfile:write("}\n")
 
 -- Erziehung
 menuStart("Erziehung", "applications-education")
 	menuItems(apps, "Science")
-print("}")
+outfile:write("}\n")
 
 -- Netzwerk
 menuStart("Netzwerk", "nm-device-wireless")
-	menuItems(apps, "Network")
-	menuItems(apps,"WebBrowser")
-print("}")
+	menuItems(apps, "Network WebBrowser X-Internet")
+outfile:write("}\n")
 
 -- Einstellungen
 menuStart("Einstellungen", "preferences-other")
 	menuStart("Desktop", "preferences-desktop-personal")
 		menuItems(apps, "DesktopSettings")
-	print("}")
+	outfile:write("}\n")
 	menuStart("Hardware", "preferences-desktop-peripherals")
 		menuItems(apps, "HardwareSettings")
-	print("}")
+	outfile:write("}\n")
 	menuStart("Alle", "preferences-other")
 		menuItems(apps, "Settings X%-Setup%-puppy")
-	print("}")
-print("}")
+	outfile:write("}\n")
+outfile:write("}\n")
 
 -- System
 menuStart("System", "preferences-system-network")
-	print("prog \"Midnight-Commander\" "..findIcon("MidnightCommander").." x-terminal-emulator -e mc")
-	print("prog \"Pcmanfm-Dateimanager\" "..findIcon("system-file-manager").." pcmanfm")
-	print("prog \"Thunar-Dateimanager\" "..findIcon("thunar").." thunar")
-	print("prog \"Druckerkonfiguration\" "..findIcon("printer").." system-config-printer")
+	outfile:write("prog \"Midnight-Commander\" "..findIcon("MidnightCommander").." x-terminal-emulator -e mc\n")
+	outfile:write("prog \"Pcmanfm-Dateimanager\" "..findIcon("system-file-manager").." pcmanfm\n")
+	outfile:write("prog \"Thunar-Dateimanager\" "..findIcon("thunar").." thunar\n")
+	outfile:write("prog \"Druckerkonfiguration\" "..findIcon("printer").." system-config-printer\n")
 
-	print("separator")
-	print("prog \"Sofware-Manager\" "..findIcon("mintinstall").." mintinstall")
-	print("prog \"Update-Manager\" "..findIcon("mintupdate").." mintupdate")
-	print("prog \"Synaptic-Paketmanager\" "..findIcon("synaptic").." synaptic-pkexec")
-	print("separator")
+	outfile:write("separator\n")
+	outfile:write("prog \"Sofware-Manager\" "..findIcon("mintinstall").." mintinstall\n")
+	outfile:write("prog \"Update-Manager\" "..findIcon("mintupdate").." mintupdate\n")
+	outfile:write("prog \"Synaptic-Paketmanager\" "..findIcon("synaptic").." synaptic-pkexec\n")
+	outfile:write("separator\n")
 	menuStart("Dateisystem", "drive-multidisk")
 		menuItems(apps, "Filesystem")	
 		menuItems(apps, "FileTools")
 --		menuItems(apps, "FileManager")
-	print("}")
+	outfile:write("}\n")
 
 	menuStart("Sicherheit/Monitoring", "security-high")
 		menuItems(apps, "Monitor")
 		menuItems(apps, "Security")
-	print("}")
+	outfile:write("}\n")
 
 	menuStart("Terminals", "konsole")
 		menuItems(apps, "TerminalEmulator X%-Utility%-shell")
-	print("}")
+	outfile:write("}\n")
 	menuStart("Alle", "preferences-system-network")
 		menuItems(apps, "System")
-	print("}")
-print("}")
+	outfile:write("}\n")
+outfile:write("}\n")
 
 -- Werkzeuge
 menuStart("Werkzeuge", "gnome-util")
@@ -261,9 +265,13 @@ menuStart("Werkzeuge", "gnome-util")
 	menuItems(apps, "TextTools")
 	menuStart("Alle", "gnome-util")
 		menuItems(apps, "Utility")
-	print("}")
-print("}")
+	outfile:write("}\n")
+outfile:write("}\n")
 
 --for i,v in ipairs(iconTable) do
 --	io.stderr:write(v)
 --end
+
+io.stderr:write("Finished!")
+outfile.close()
+

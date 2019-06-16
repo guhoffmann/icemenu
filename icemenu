@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.16-1"
+local appname = "Icemenu 19.6.16-2"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -14,6 +14,27 @@ local iconTable = {}
 local terminal = "x-terminal-emulator -e "
 local par
 local appsdir = "/usr/share/applications"
+
+-- parse command line ---------------------------------------------------------
+
+function parseCmdLine()
+	if arg[1] == "-h" or arg[1] == "h" or arg[1] == "--help" then
+		print("\n"..appname.."\n\nCreates an icewm menu file!\n")
+		os.exit()
+	end
+
+	local i = 1
+	while i <= #arg do
+		if arg[i] == "-c" or arg[i] == "c" then
+			par = arg[i]
+		elseif arg[i] == "-i" or arg[i] == "i" then
+			iconBase = arg[i+1]
+			i = i + 1
+		else appsdir = arg[i]
+		end
+		i = i + 1
+	end
+end -- of parseCmdLine
 
 -- return table with lines of shell command output ----------------------------
 
@@ -148,18 +169,7 @@ end
 
 local apps = {}
 
--- parse command line
-local i = 1
-while i <= #arg do
-	if arg[i] == "-c" or arg[i] == "c" then
-		par = arg[i]
-	elseif arg[i] == "-i" or arg[i] == "i" then
-		iconBase = arg[i+1]
-		i = i + 1
-	else appsdir = arg[i]
-	end
-	i = i + 1
-end
+parseCmdLine()
 
 for i,v in ipairs(shellTable("ls "..appsdir.."/*.desktop")) do
 	table.insert(apps, shellTable("cat "..v))

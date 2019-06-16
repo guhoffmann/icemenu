@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.12"
+local appname = "Icemenu 19.6.15"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -11,7 +11,8 @@ local iconDirs = {
 }
 local iconTable = {}
 local terminal = "x-terminal-emulator -e "
-local par = arg[1]
+local par
+local appsdir = "/usr/share/applications"
 
 -- return table with lines of shell command output ----------------------------
 
@@ -145,7 +146,18 @@ end
 -- main part ------------------------------------------------------------------
 
 local apps = {}
-for i,v in ipairs(shellTable("ls /usr/share/applications/*.desktop")) do
+
+-- parse command line
+for i = 1,#arg do
+	if arg[i] == "-c" or arg[i] == "c" then
+		par = arg[i]
+	else appsdir = arg[i]
+	end
+end
+
+print(par,ppsdir)
+
+for i,v in ipairs(shellTable("ls "..appsdir.."/*.desktop")) do
 	table.insert(apps, shellTable("cat "..v))
 end
 
@@ -158,9 +170,9 @@ if fileExists("/sbin/reboot") then
 	print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
 end
 if fileExists("/sbin/poweroff") then 
-	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich ausschalten?\" \"/sbin/poweroff\"")
 else
-	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich ausschalten?\" \"/sbin/shutdown now\"")
 end
 print("}")
 print("separator")

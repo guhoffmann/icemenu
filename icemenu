@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.15"
+local appname = "Icemenu 19.6.16"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -154,8 +154,6 @@ for i = 1,#arg do
 	else appsdir = arg[i]
 	end
 end
-
-print(par,ppsdir)
 
 for i,v in ipairs(shellTable("ls "..appsdir.."/*.desktop")) do
 	table.insert(apps, shellTable("cat "..v))

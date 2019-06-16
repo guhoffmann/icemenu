@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.16"
+local appname = "Icemenu 19.6.16-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -9,6 +9,7 @@ local iconDirs = {
 	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
 	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
 }
+local iconBase="" -- Base dir for icon search
 local iconTable = {}
 local terminal = "x-terminal-emulator -e "
 local par
@@ -46,9 +47,9 @@ end
 
 function readIcons()
 	for i,v in ipairs(iconDirs) do
-		table.merge(iconTable, shellTable("find "..v.." -name *.png"))
-		table.merge(iconTable, shellTable("find "..v.." -name *.xpm"))
-		table.merge(iconTable, shellTable("find "..v.." -name *.svg"))
+		table.merge(iconTable, shellTable("find "..iconBase..v.." -name *.png"))
+		table.merge(iconTable, shellTable("find "..iconBase..v.." -name *.xpm"))
+		table.merge(iconTable, shellTable("find "..iconBase..v.." -name *.svg"))
 	end -- of for i,v ...
 end
 
@@ -58,17 +59,17 @@ function findIcon(iconName)
 	if iconName ~= nil then 
 		-- first: test if icon given with full url can be found
 		if fileExists(iconName) and string.match(iconName,".png") then
-			return iconName
+			return iconBase..iconName -- iconBase must be prepended!!!
 		-- if not found then search in iconTable for icon
 		else
 			for i,v in ipairs(iconTable) do
-				if string.find(v,iconName,1,true) and string.match(v,".png") then
+				if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm"))then
 				return v end
 			end
 		end
 	end
 	-- return this if nothing is found!
-	return " /usr/share/icons/gnome/32x32/actions/gnome-run.png "
+	return iconBase.."/usr/share/icons/gnome/32x32/actions/gnome-run.png "
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -130,9 +131,9 @@ function menuItems(appTable, categories)
 			local terminalTrue = lineSearch(appEntry, "Terminal=.*$")
 			local iconFound = findIcon(string.match(icon, "Icon=(.*)"))
 			if terminalTrue == "Terminal=true" then
-				print("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec)
+				print("   prog \""..name..comment.."\" "..string.match(iconFound,iconBase.."(.*)").." "..terminal.." "..exec)
 			else
-				print("   prog \""..name..comment.."\" "..iconFound.." "..exec)
+				print("   prog \""..name..comment.."\" "..string.match(iconFound,iconBase.."(.*)").." "..exec)
 			end
 
 		end -- of if checkString ...
@@ -148,11 +149,16 @@ end
 local apps = {}
 
 -- parse command line
-for i = 1,#arg do
+local i = 1
+while i <= #arg do
 	if arg[i] == "-c" or arg[i] == "c" then
 		par = arg[i]
+	elseif arg[i] == "-i" or arg[i] == "i" then
+		iconBase = arg[i+1]
+		i = i + 1
 	else appsdir = arg[i]
 	end
+	i = i + 1
 end
 
 for i,v in ipairs(shellTable("ls "..appsdir.."/*.desktop")) do
@@ -277,6 +283,3 @@ menuStart("Werkzeuge", "gnome-util")
 	print("}")
 print("}")
 
---for i,v in ipairs(iconTable) do
---	io.stderr:write(v)
---end

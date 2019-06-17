@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.16-2"
+local appname = "Icemenu 19.6.17-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -9,7 +9,7 @@ local iconDirs = {
 	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
 	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
 }
-local iconBase="" -- Base dir for icon search
+local rootBase="" -- Base dir for icon search
 local iconTable = {}
 local terminal = "x-terminal-emulator -e "
 local par
@@ -18,8 +18,24 @@ local appsdir = "/usr/share/applications"
 -- parse command line ---------------------------------------------------------
 
 function parseCmdLine()
+	-- print help if selected
 	if arg[1] == "-h" or arg[1] == "h" or arg[1] == "--help" then
-		print("\n"..appname.."\n\nCreates an icewm menu file!\n")
+		print("\n"..appname.." - Creates an icewm menu file!\n")
+		print([[usage: icemenu [options] [appsDir]
+Available options are:
+-c show       short comment line after program name in menu
+-r directory  root directory for icon and application search
+-h show       help page
+
+[appsDir] ist the directory where to search application desktop files, defaults to /usr/share/applications.
+If option '-r' is given, applications and icons are searched in a directory tree starting at the given directory.
+Examples:
+icemenu             search applications in '/usr/share/applications', icons in '/usr/share/icons'.
+icemenu -r rootfs   search applications in 'rootfs/usr/share/applications', icons in 'rootfs/usr/share/icons'.
+icemenu -c          search applications/icons in default dirs, add short comment to program title.
+
+Output is done to stdout. To create a menu file, redirect output! (e.g. "icemenu >~/.icewm/menu")
+]])
 		os.exit()
 	end
 
@@ -27,8 +43,8 @@ function parseCmdLine()
 	while i <= #arg do
 		if arg[i] == "-c" or arg[i] == "c" then
 			par = arg[i]
-		elseif arg[i] == "-i" or arg[i] == "i" then
-			iconBase = arg[i+1]
+		elseif arg[i] == "-r" or arg[i] == "r" then
+			rootBase = arg[i+1]
 			i = i + 1
 		else appsdir = arg[i]
 		end
@@ -68,9 +84,9 @@ end
 
 function readIcons()
 	for i,v in ipairs(iconDirs) do
-		table.merge(iconTable, shellTable("find "..iconBase..v.." -name *.png"))
-		table.merge(iconTable, shellTable("find "..iconBase..v.." -name *.xpm"))
-		table.merge(iconTable, shellTable("find "..iconBase..v.." -name *.svg"))
+		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.png"))
+		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.xpm"))
+		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.svg"))
 	end -- of for i,v ...
 end
 
@@ -80,17 +96,19 @@ function findIcon(iconName)
 	if iconName ~= nil then 
 		-- first: test if icon given with full url can be found
 		if fileExists(iconName) and string.match(iconName,".png") then
-			return iconBase..iconName -- iconBase must be prepended!!!
+			return rootBase..iconName -- rootBase must be prepended!!!
 		-- if not found then search in iconTable for icon
 		else
 			for i,v in ipairs(iconTable) do
+				-- activate/deactivate the corresponing lines if you also want SVG icons to be found!!!
 				if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm"))then
+				--if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm") or string.match(v,".svg")) then
 				return v end
 			end
 		end
 	end
 	-- return this if nothing is found!
-	return iconBase.."/usr/share/icons/gnome/32x32/actions/gnome-run.png "
+	return rootBase.."/usr/share/icons/gnome/32x32/actions/gnome-run.png "
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -152,9 +170,9 @@ function menuItems(appTable, categories)
 			local terminalTrue = lineSearch(appEntry, "Terminal=.*$")
 			local iconFound = findIcon(string.match(icon, "Icon=(.*)"))
 			if terminalTrue == "Terminal=true" then
-				print("   prog \""..name..comment.."\" "..string.match(iconFound,iconBase.."(.*)").." "..terminal.." "..exec)
+				print("   prog \""..name..comment.."\" "..string.match(iconFound,rootBase.."(.*)").." "..terminal.." "..exec)
 			else
-				print("   prog \""..name..comment.."\" "..string.match(iconFound,iconBase.."(.*)").." "..exec)
+				print("   prog \""..name..comment.."\" "..string.match(iconFound,rootBase.."(.*)").." "..exec)
 			end
 
 		end -- of if checkString ...
@@ -171,7 +189,7 @@ local apps = {}
 
 parseCmdLine()
 
-for i,v in ipairs(shellTable("ls "..appsdir.."/*.desktop")) do
+for i,v in ipairs(shellTable("ls "..rootBase..appsdir.."/*.desktop")) do
 	table.insert(apps, shellTable("cat "..v))
 end
 

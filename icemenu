@@ -1,17 +1,56 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.5.10"
+local appname = "Icemenu 19.6.18-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
-	"/usr/share/icons/hicolor/64x64/", "/usr/share/icons/Mint-Y/apps/32/",
+	"/usr/share/icons/hicolor", "/usr/share/icons/Mint-Y/apps/32/",
 	"/usr/share/pixmaps", "/usr/share/games", "/usr/share/app-install/icons",
 	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
 	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
 }
+local rootBase="" -- Base dir for icon search
 local iconTable = {}
 local terminal = "x-terminal-emulator -e "
-local par = arg[1]
+local par
+local appsdir = "/usr/share/applications"
+
+-- parse command line ---------------------------------------------------------
+
+function parseCmdLine()
+	-- print help if selected
+	if arg[1] == "-h" or arg[1] == "h" or arg[1] == "--help" then
+		print("\n"..appname.." - Creates an icewm menu file!\n")
+		print([[usage: icemenu [options] [appsDir]
+Available options are:
+-c show       short comment line after program name in menu
+-r directory  root directory for icon and application search
+-h show       help page
+
+[appsDir] ist the directory where to search application desktop files, defaults to /usr/share/applications.
+If option '-r' is given, applications and icons are searched in a directory tree starting at the given directory.
+Examples:
+icemenu             search applications in '/usr/share/applications', icons in '/usr/share/icons'.
+icemenu -r rootfs   search applications in 'rootfs/usr/share/applications', icons in 'rootfs/usr/share/icons'.
+icemenu -c          search applications/icons in default dirs, add short comment to program title.
+
+Output is done to stdout. To create a menu file, redirect output! (e.g. "icemenu >~/.icewm/menu")
+]])
+		os.exit()
+	end
+
+	local i = 1
+	while i <= #arg do
+		if arg[i] == "-c" or arg[i] == "c" then
+			par = arg[i]
+		elseif arg[i] == "-r" or arg[i] == "r" then
+			rootBase = arg[i+1]
+			i = i + 1
+		else appsdir = arg[i]
+		end
+		i = i + 1
+	end
+end -- of parseCmdLine
 
 -- return table with lines of shell command output ----------------------------
 
@@ -45,9 +84,7 @@ end
 
 function readIcons()
 	for i,v in ipairs(iconDirs) do
-		table.merge(iconTable, shellTable("find "..v.." -name *.png"))
-		table.merge(iconTable, shellTable("find "..v.." -name *.xpm"))
-		table.merge(iconTable, shellTable("find "..v.." -name *.svg"))
+		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.png -o -name *.xpm -o -name *.svg"))
 	end -- of for i,v ...
 end
 
@@ -60,14 +97,17 @@ function findIcon(iconName)
 			return iconName
 		-- if not found then search in iconTable for icon
 		else
+		-- if not found then search in iconTable for icon
 			for i,v in ipairs(iconTable) do
-				if string.find(v,iconName,1,true) and string.match(v,".png") then
-				return v end
+				-- activate/deactivate the corresponing lines if you also want SVG icons to be found!!!
+				if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm"))then
+				--if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm") or string.match(v,".svg")) then
+				return v:match("[^("..rootBase:gsub("-","%%-")..")].*") end
 			end
 		end
 	end
 	-- return this if nothing is found!
-	return " /usr/share/icons/gnome/32x32/actions/gnome-run.png "
+	return "/usr/share/icons/gnome/32x32/actions/gnome-run.png "
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -131,6 +171,7 @@ function menuItems(appTable, categories)
 			if terminalTrue == "Terminal=true" then
 				print("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec)
 			else
+				--print(rootBase, name, iconFound, iconFound:match("[^("..rootBase:gsub("-","%%-")..")].*"), exec)
 				print("   prog \""..name..comment.."\" "..iconFound.." "..exec)
 			end
 
@@ -145,7 +186,10 @@ end
 -- main part ------------------------------------------------------------------
 
 local apps = {}
-for i,v in ipairs(shellTable("ls /usr/share/applications/*.desktop")) do
+
+parseCmdLine()
+
+for i,v in ipairs(shellTable("ls "..rootBase..appsdir.."/*.desktop")) do
 	table.insert(apps, shellTable("cat "..v))
 end
 
@@ -154,11 +198,14 @@ readIcons()
 -- Menu Beenden
 print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
 print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
-print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
-print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich Rechner runterfahren?\" \"/sbin/shutdown now\"")
--- Puppy specific!!
-print("	prog \"Neustart\" "..findIcon("reload").." /sbin/reboot")
-print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." /sbin/poweroff")
+if fileExists("/sbin/reboot") then 
+	print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
+end
+if fileExists("/sbin/poweroff") then 
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich ausschalten?\" \"/sbin/poweroff\"")
+else
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich ausschalten?\" \"/sbin/shutdown now\"")
+end
 print("}")
 print("separator")
 print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
@@ -263,6 +310,3 @@ menuStart("Werkzeuge", "gnome-util")
 	print("}")
 print("}")
 
---for i,v in ipairs(iconTable) do
---	io.stderr:write(v)
---end

@@ -1,10 +1,10 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.17-1"
+local appname = "Icemenu 19.6.18-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
-	"/usr/share/icons/hicolor/64x64/", "/usr/share/icons/Mint-Y/apps/32/",
+	"/usr/share/icons/hicolor", "/usr/share/icons/Mint-Y/apps/32/",
 	"/usr/share/pixmaps", "/usr/share/games", "/usr/share/app-install/icons",
 	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
 	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
@@ -84,9 +84,7 @@ end
 
 function readIcons()
 	for i,v in ipairs(iconDirs) do
-		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.png"))
-		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.xpm"))
-		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.svg"))
+		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.png -o -name *.xpm -o -name *.svg"))
 	end -- of for i,v ...
 end
 
@@ -96,19 +94,19 @@ function findIcon(iconName)
 	if iconName ~= nil then 
 		-- first: test if icon given with full url can be found
 		if fileExists(iconName) and string.match(iconName,".png") then
-			return rootBase..iconName -- rootBase must be prepended!!!
+			return iconName -- rootBase must be prepended!!!
 		-- if not found then search in iconTable for icon
 		else
 			for i,v in ipairs(iconTable) do
 				-- activate/deactivate the corresponing lines if you also want SVG icons to be found!!!
 				if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm"))then
 				--if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm") or string.match(v,".svg")) then
-				return v end
+				return v:match("[^("..rootBase:gsub("-","%%-")..")].*") end
 			end
 		end
 	end
 	-- return this if nothing is found!
-	return rootBase.."/usr/share/icons/gnome/32x32/actions/gnome-run.png "
+	return "/usr/share/icons/gnome/32x32/actions/gnome-run.png "
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -170,9 +168,10 @@ function menuItems(appTable, categories)
 			local terminalTrue = lineSearch(appEntry, "Terminal=.*$")
 			local iconFound = findIcon(string.match(icon, "Icon=(.*)"))
 			if terminalTrue == "Terminal=true" then
-				print("   prog \""..name..comment.."\" "..string.match(iconFound,rootBase.."(.*)").." "..terminal.." "..exec)
+				print("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec)
 			else
-				print("   prog \""..name..comment.."\" "..string.match(iconFound,rootBase.."(.*)").." "..exec)
+				--print(rootBase, name, iconFound, iconFound:match("[^("..rootBase:gsub("-","%%-")..")].*"), exec)
+				print("   prog \""..name..comment.."\" "..iconFound.." "..exec)
 			end
 
 		end -- of if checkString ...

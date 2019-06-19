@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.18-1"
+local appname = "Icemenu 19.6.19-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -84,7 +84,10 @@ end
 
 function readIcons()
 	for i,v in ipairs(iconDirs) do
-		table.merge(iconTable, shellTable("find "..rootBase..v.." -name *.png -o -name *.xpm -o -name *.svg"))
+		table.merge(iconTable,
+			--[[ must cd to 'rootBase' first to get all icons, 'cause 'find' wouldn't get
+			all icons sometimes. Dunno the exact reason...]]
+			shellTable("AKTDIR=$(pwd); cd "..rootBase.."; find "..v.." -name *.png -o -name *.xpm -o -name *.svg; cd $AKTDIR"))
 	end -- of for i,v ...
 end
 
@@ -249,8 +252,7 @@ print("}")
 
 -- Netzwerk
 menuStart("Netzwerk", "nm-device-wireless")
-	menuItems(apps, "Network")
-	menuItems(apps,"WebBrowser")
+	menuItems(apps, "Network WebBrowser X%-Internet")
 print("}")
 
 -- Einstellungen
@@ -279,14 +281,11 @@ menuStart("System", "preferences-system-network")
 	print("prog \"Synaptic-Paketmanager\" "..findIcon("synaptic").." synaptic-pkexec")
 	print("separator")
 	menuStart("Dateisystem", "drive-multidisk")
-		menuItems(apps, "Filesystem")	
-		menuItems(apps, "FileTools")
---		menuItems(apps, "FileManager")
+		menuItems(apps, "Filesystem FileTools FileManager")
 	print("}")
 
 	menuStart("Sicherheit/Monitoring", "security-high")
-		menuItems(apps, "Monitor")
-		menuItems(apps, "Security")
+		menuItems(apps, "Monitor Security")
 	print("}")
 
 	menuStart("Terminals", "konsole")
@@ -299,12 +298,7 @@ print("}")
 
 -- Werkzeuge
 menuStart("Werkzeuge", "gnome-util")
-	menuItems(apps, "Accessiblility")
-	menuItems(apps, "Archiving")
-	menuItems(apps, "Calculator")
-	menuItems(apps, "Clock")
-	menuItems(apps, "TextEditor")
-	menuItems(apps, "TextTools")
+	menuItems(apps, "Accessiblility Archiving Calculator Clock TextEditor TextTools")
 	menuStart("Alle", "gnome-util")
 		menuItems(apps, "Utility")
 	print("}")

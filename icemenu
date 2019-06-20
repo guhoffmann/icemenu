@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.19-1"
+local appname = "Icemenu 19.6.20-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -96,8 +96,11 @@ end
 function findIcon(iconName)
 	if iconName ~= nil then 
 		-- first: test if icon given with full url can be found
-		if fileExists(iconName) and string.match(iconName,".png") then
-			return iconName
+		if fileExists(iconName) then
+			if string.match(iconName,".svg") then
+				return iconName..".png"
+				else return iconName
+			end
 		-- if not found then search in iconTable for icon
 		else
 		-- if not found then search in iconTable for icon

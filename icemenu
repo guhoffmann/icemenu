@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.19-1"
+local appname = "Icemenu 19.6.22-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -23,7 +23,7 @@ function parseCmdLine()
 		print("\n"..appname.." - Creates an icewm menu file!\n")
 		print([[usage: icemenu [options] [appsDir]
 Available options are:
--c show       short comment line after program name in menu
+-c show       short comment line after program name in  menu
 -r directory  root directory for icon and application search
 -h show       help page
 
@@ -87,7 +87,7 @@ function readIcons()
 		table.merge(iconTable,
 			--[[ must cd to 'rootBase' first to get all icons, 'cause 'find' wouldn't get
 			all icons sometimes. Dunno the exact reason...]]
-			shellTable("AKTDIR=$(pwd); cd "..rootBase.."; find "..v.." -name *.png -o -name *.xpm -o -name *.svg; cd $AKTDIR"))
+			shellTable("AKTDIR=$(pwd); cd "..rootBase.."; find "..v.." -name \"*.png\" -o -name \"*.xpm\" -o -name \"*.svg\"; cd $AKTDIR"))
 	end -- of for i,v ...
 end
 
@@ -95,11 +95,15 @@ end
 
 function findIcon(iconName)
 	if iconName ~= nil then 
-		-- first: test if icon given with full url can be found
-		if fileExists(iconName) and string.match(iconName,".png") then
-			return iconName -- rootBase must be prepended!!!
-		-- if not found then search in iconTable for icon
-		else
+		-- first: test if icon given with full url and has an icon extension can be found
+		if fileExists(iconName) and (string.match(iconName,".png")
+		or string.match(iconName,".svg")
+		or string.match(iconName,".xpm")) then
+			if string.match(iconName,".svg") then
+				return iconName..".png"
+				else return iconName
+			end
+		else 	-- if not found then search in iconTable for icon
 			for i,v in ipairs(iconTable) do
 				-- activate/deactivate the corresponing lines if you also want SVG icons to be found!!!
 				if string.find(v,iconName,1,true) and (string.match(v,".png") or string.match(v,".xpm"))then
@@ -222,7 +226,7 @@ print("}")
 
 -- Grafik
 menuStart("Grafik", "package_graphics")
-	menuItems(apps, "Graphics")
+	menuItems(apps, "Graphics X-GraphicUtility")
 print("}")
 
 -- Spiele
@@ -232,7 +236,7 @@ print("}")
 
 -- Multimedia/Audio/Video
 menuStart("Multimedia", "package_multimedia")
-	menuItems(apps, "AudioVideo")
+	menuItems(apps, "AudioVideo Video Audio")
 print("}")
 
 -- Office
@@ -304,3 +308,5 @@ menuStart("Werkzeuge", "gnome-util")
 	print("}")
 print("}")
 
+-- Testoutput!
+--for i,v in ipairs(iconTable) do; print(v); end

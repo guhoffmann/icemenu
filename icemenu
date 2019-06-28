@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.22-1"
+local appname = "Icemenu 19.6.28-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -99,10 +99,7 @@ function findIcon(iconName)
 		if fileExists(iconName) and (string.match(iconName,".png")
 		or string.match(iconName,".svg")
 		or string.match(iconName,".xpm")) then
-			if string.match(iconName,".svg") then
-				return iconName..".png"
-				else return iconName
-			end
+			return iconName
 		else 	-- if not found then search in iconTable for icon
 			for i,v in ipairs(iconTable) do
 				-- activate/deactivate the corresponing lines if you also want SVG icons to be found!!!

@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.28-1"
+local appname = "Icemenu 19.6.28-2"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -110,7 +110,7 @@ function findIcon(iconName)
 		end
 	end
 	-- return this if nothing is found!
-	return "/usr/share/icons/gnome/32x32/actions/gnome-run.png "
+	return "/usr/share/icons/gnome/32x32/actions/gnome-run.png"
 end
 
 -- search appTable for line containing expression -----------------------------
@@ -150,7 +150,7 @@ function menuItems(appTable, categories)
 
 			local name = lineSearch(appEntry,"Name.de.=.*$")
 			if name == "nix" then
-				name = lineSearch(appEntry, "Name=.*$" )
+				name = lineSearch(appEntry, "^Name=.*$" )
 			end
 			name = string.match(name,"=(.*)")
 			local comment
@@ -172,10 +172,10 @@ function menuItems(appTable, categories)
 			local terminalTrue = lineSearch(appEntry, "Terminal=.*$")
 			local iconFound = findIcon(string.match(icon, "Icon=(.*)"))
 			if terminalTrue == "Terminal=true" then
-				print("   prog \""..name..comment.."\" "..iconFound.." "..terminal.." "..exec)
+				print("   prog \""..name..comment.."\" \""..iconFound.."\" "..terminal.." "..exec)
 			else
 				--print(rootBase, name, iconFound, iconFound:match("[^("..rootBase:gsub("-","%%-")..")].*"), exec)
-				print("   prog \""..name..comment.."\" "..iconFound.." "..exec)
+				print("   prog \""..name..comment.."\" \""..iconFound.."\" "..exec)
 			end
 
 		end -- of if checkString ...

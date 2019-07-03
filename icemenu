@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.6.30-1"
+local appname = "Icemenu 19.7.3-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -213,7 +213,7 @@ print("}")
 print("separator")
 print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
 print("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder")
-print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
+--print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
 print("separator")
 
 -- Entwicklung

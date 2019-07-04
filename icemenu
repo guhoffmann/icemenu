@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.7.3-1"
+local appname = "Icemenu 19.7.4-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -200,14 +200,14 @@ readIcons()
 
 -- Menu Beenden
 print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
-print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno \"Wirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
+print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno --text-align=center --width=400 --undecorated --height=200 --center --no-markup --text=\"\n\n\nWirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
 if fileExists("/sbin/reboot") then 
-	print("	prog \"Neustart\" "..findIcon("reload.png").." yesno \"Wirklich Rechner neu starten?\" \"/sbin/reboot\"")
+	print("	prog \"Neustart\" "..findIcon("reload.png").." yesno --text-align=center --width=400 --undecorated --height=200 --center --no-markup --text=\"\n\n\nWirklich Rechner neu starten?\" \"/sbin/reboot\"")
 end
 if fileExists("/sbin/poweroff") then 
-	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich ausschalten?\" \"/sbin/poweroff\"")
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno --text-align=center --undecorated --width=400 --height=200 --center --no-markup --text=\"\n\n\nWirklich ausschalten?\" \"/sbin/poweroff\"")
 else
-	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno \"Wirklich ausschalten?\" \"/sbin/shutdown now\"")
+	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno --text-align=center --undecorated --width=400 --height=200 --center --no-markup --text=\"\n\n\nWirklich ausschalten?\" \"/sbin/shutdown now\"")
 end
 print("}")
 print("separator")

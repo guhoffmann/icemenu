@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.7.4-2"
+local appname = "Icemenu 19.7.19-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -15,6 +15,27 @@ local terminal = "x-terminal-emulator -e "
 local par
 local appsdir = "/usr/share/applications"
 
+local locales = {
+	de = {exit = "Beenden", logout = "Abmelden", reboot = "Neustart", poweroff = "Ausschalten",
+			terminal = "Terminal", appfinder = "AppFinder", development = "Entwicklung",
+			graphics = "Grafik", games = "Spiele", multimedia = "Multimedia", office = "Büro",
+			science = "Wissenschaft", education = "Erziehung", network = "Netzwerk", settings = "Einstellungen",
+			desktop = "Desktop", hardware = "Hardware", all = "Alle", system = "System",
+			filesystem = "Dateisystem", safety = "Sicherheit/Monitoring", terminals = "Terminals",
+			tools = "Werkzeuge" 
+			},
+	en = {exit = "Exit", logout = "Logout", reboot = "Reboot", poweroff = "Power off",
+			terminal = "Terminal", appfinder = "AppFinder", development = "Development",
+			graphics = "Graphics", games = "Games", multimedia = "Multimedia", office = "Office",
+			science = "Science", education = "Education", network = "Network", settings = "Settings",
+			desktop = "Desktop", hardware = "Hardware", all = "All", system = "System",
+			filesystem = "Filesystem", safety = "Safety/Monitoring", terminals = "Terminals",
+			tools = "Tools" 
+			}
+}
+
+lang = "en"
+
 -- parse command line ---------------------------------------------------------
 
 function parseCmdLine()
@@ -23,9 +44,10 @@ function parseCmdLine()
 		print("\n"..appname.." - Creates an icewm menu file!\n")
 		print([[usage: icemenu [options] [appsDir]
 Available options are:
--c show       short comment line after program name in  menu
+-c            short comment line after program name in  menu
 -r directory  root directory for icon and application search
--h show       help page
+-l language   make menu in language given (de,en)
+-h            show help page
 
 [appsDir] ist the directory where to search application desktop files, defaults to /usr/share/applications.
 If option '-r' is given, applications and icons are searched in a directory tree starting at the given directory.
@@ -46,6 +68,12 @@ Output is done to stdout. To create a menu file, redirect output! (e.g. "icemenu
 		elseif arg[i] == "-r" or arg[i] == "r" then
 			rootBase = arg[i+1]
 			i = i + 1
+		elseif arg[i] == "-l" or arg[i] == "l" then
+			lang = arg[i+1]
+			i = i + 1
+			if lang ~= "de" and lang ~= "en" then
+				lang = "en"
+			end
 		else appsdir = arg[i]
 		end
 		i = i + 1
@@ -148,7 +176,7 @@ function menuItems(appTable, categories)
 	--	print("***"..categoryEntry.."***"..categories.."***"..lineSearch(appEntry,"Exec=.*$") )
 		if checkString(categoryEntry, categories) then
 
-			local name = lineSearch(appEntry,"Name.de.=.*$")
+			local name = lineSearch(appEntry,"Name."..lang..".=.*$")
 			if name == "nix" then
 				name = lineSearch(appEntry, "^Name=.*$" )
 			end
@@ -156,7 +184,7 @@ function menuItems(appTable, categories)
 			local comment
 			-- read comment if parameter -c or c is given only!
 			if par == "c" or par == "-c" then
-				comment = lineSearch(appEntry,"Comment.de.=.*$")
+				comment = lineSearch(appEntry,"Comment."..lang..".=.*$")
 				if comment == "nix" then
 					comment = lineSearch(appEntry, "Comment=.*$" )
 				end
@@ -199,108 +227,106 @@ end
 readIcons()
 
 -- Menu Beenden
-print("menu \"Beenden...\" "..findIcon("exit.png").."  {")
-print("	prog \"Abmelden\" "..findIcon("gnome-logout.png").." yesno --image=\""..findIcon("gnome-logout").."\" --text-align=center --width=400 --undecorated --height=200 --center --no-markup --text=\"\n\n\nWirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
+print("menu \""..locales[lang].exit.."\" "..findIcon("exit.png").."  {")
+print("	prog \""..locales[lang].logout.."\" "..findIcon("gnome-logout.png").." yesno --image=\""..findIcon("gnome-logout").."\" --text-align=center --width=400 --undecorated --height=200 --center --no-markup --text=\"\n\n\nWirklich Benutzer abmelden?\" \"killall uweicewm-session\"")
 if fileExists("/sbin/reboot") then 
-	print("	prog \"Neustart\" "..findIcon("reload.png").." yesno --image=\""..findIcon("reload.png").."\" --text-align=center --width=400 --undecorated --height=200 --center --no-markup --text=\"\n\n\nWirklich Rechner neu starten?\" \"/sbin/reboot\"")
+	print("	prog \""..locales[lang].reboot.."\" "..findIcon("reload.png").." yesno --image=\""..findIcon("reload.png").."\" --text-align=center --width=400 --undecorated --height=200 --center --no-markup --text=\"\n\n\nWirklich Rechner neu starten?\" \"/sbin/reboot\"")
 end
 if fileExists("/sbin/poweroff") then 
-	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno --image=\""..findIcon("gnome-shutdown.png").."\" --text-align=center --undecorated --width=400 --height=200 --center --no-markup --text=\"\n\n\nWirklich ausschalten?\" \"/sbin/poweroff\"")
+	print("	prog \""..locales[lang].poweroff.."\" "..findIcon("gnome-shutdown.png").." yesno --image=\""..findIcon("gnome-shutdown.png").."\" --text-align=center --undecorated --width=400 --height=200 --center --no-markup --text=\"\n\n\nWirklich ausschalten?\" \"/sbin/poweroff\"")
 else
-	print("	prog \"Ausschalten\" "..findIcon("gnome-shutdown.png").." yesno --image=\""..findIcon("gnome-shutdown.png").."\" --text-align=center --undecorated --width=400 --height=200 --center --no-markup --text=\"\n\n\nWirklich ausschalten?\" \"/sbin/shutdown now\"")
+	print("	prog \""..locales[lang].poweroff.."\" "..findIcon("gnome-shutdown.png").." yesno --image=\""..findIcon("gnome-shutdown.png").."\" --text-align=center --undecorated --width=400 --height=200 --center --no-markup --text=\"\n\n\nWirklich ausschalten?\" \"/sbin/shutdown now\"")
 end
 print("}")
 print("separator")
-print("prog \"Terminal\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
-print("prog \"Appfinder\" "..findIcon("edit-find").." xfce4-appfinder")
+print("prog \""..locales[lang].terminal.."\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
+print("prog \""..locales[lang].appfinder.."\" "..findIcon("edit-find").." xfce4-appfinder")
 --print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
 print("separator")
 
 -- Entwicklung
-menuStart("Entwicklung", "package_development")
+menuStart(locales[lang].development, "package_development")
 	menuItems(apps, "Development")
 print("}")
 
 -- Grafik
-menuStart("Grafik", "package_graphics")
+menuStart(locales[lang].graphics, "package_graphics")
 	menuItems(apps, "Graphics X-GraphicUtility")
 print("}")
 
 -- Spiele
-menuStart("Spiele", "package_games")
+menuStart(locales[lang].games, "package_games")
 	menuItems(apps, "Game")
 print("}")
 
 -- Multimedia/Audio/Video
-menuStart("Multimedia", "package_multimedia")
+menuStart(locales[lang].multimedia, "package_multimedia")
 	menuItems(apps, "AudioVideo Video Audio")
 print("}")
 
 -- Office
-menuStart("Büro", "package_office")
+menuStart(locales[lang].office, "package_office")
 	menuItems(apps, "Office")
 print("}")
 
 -- Wissenschaft
-menuStart("Wissenschaft", "applications-science")
+menuStart(locales[lang].science, "applications-science")
 	menuItems(apps, "Science")
 print("}")
 
 -- Erziehung
-menuStart("Erziehung", "applications-education")
+menuStart(locales[lang].education, "applications-education")
 	menuItems(apps, "Science")
 print("}")
 
 -- Netzwerk
-menuStart("Netzwerk", "nm-device-wireless")
+menuStart(locales[lang].network, "nm-device-wireless")
 	menuItems(apps, "Network WebBrowser X%-Internet")
 print("}")
 
 -- Einstellungen
-menuStart("Einstellungen", "preferences-other")
-	menuStart("Desktop", "preferences-desktop-personal")
+menuStart(locales[lang].settings, "preferences-other")
+	menuStart(locales[lang].desktop, "preferences-desktop-personal")
 		menuItems(apps, "DesktopSettings")
 	print("}")
-	menuStart("Hardware", "preferences-desktop-peripherals")
+	menuStart(locales[lang].hardware, "preferences-desktop-peripherals")
 		menuItems(apps, "HardwareSettings")
 	print("}")
-	menuStart("Alle", "preferences-other")
+	menuStart(locales[lang].all, "preferences-other")
 		menuItems(apps, "Settings X%-Setup%-puppy")
 	print("}")
 print("}")
 
 -- System
-menuStart("System", "preferences-system-network")
+menuStart(locales[lang].system, "preferences-system-network")
 	print("prog \"Midnight-Commander\" "..findIcon("MidnightCommander").." x-terminal-emulator -e mc")
-	print("prog \"Pcmanfm-Dateimanager\" "..findIcon("system-file-manager").." pcmanfm")
-	print("prog \"Thunar-Dateimanager\" "..findIcon("thunar").." thunar")
-	print("prog \"Druckerkonfiguration\" "..findIcon("printer").." system-config-printer")
-
+	print("prog \"Pcmanfm\" "..findIcon("system-file-manager").." pcmanfm")
+	print("prog \"Thunar\" "..findIcon("thunar").." thunar")
 	print("separator")
 	print("prog \"Sofware-Manager\" "..findIcon("mintinstall").." mintinstall")
 	print("prog \"Update-Manager\" "..findIcon("mintupdate").." mintupdate")
-	print("prog \"Synaptic-Paketmanager\" "..findIcon("synaptic").." synaptic-pkexec")
+	print("prog \"Synaptic\" "..findIcon("synaptic").." synaptic-pkexec")
 	print("separator")
-	menuStart("Dateisystem", "drive-multidisk")
+	menuStart(locales[lang].filesystem, "drive-multidisk")
 		menuItems(apps, "Filesystem FileTools FileManager")
 	print("}")
 
-	menuStart("Sicherheit/Monitoring", "security-high")
+	menuStart(locales[lang].safety, "security-high")
 		menuItems(apps, "Monitor Security")
 	print("}")
 
-	menuStart("Terminals", "konsole")
+	menuStart(locales[lang].terminals, "konsole")
 		menuItems(apps, "TerminalEmulator X%-Utility%-shell")
 	print("}")
-	menuStart("Alle", "preferences-system-network")
+	menuStart(locales[lang].all, "preferences-system-network")
 		menuItems(apps, "System")
 	print("}")
 print("}")
 
 -- Werkzeuge
-menuStart("Werkzeuge", "gnome-util")
+menuStart(locales[lang].tools, "gnome-util")
 	menuItems(apps, "Accessiblility Archiving Calculator Clock TextEditor TextTools")
-	menuStart("Alle", "gnome-util")
+	menuStart(locales[lang].all, "gnome-util")
 		menuItems(apps, "Utility")
 	print("}")
 print("}")

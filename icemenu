@@ -256,7 +256,7 @@ print("}")
 
 -- Spiele
 menuStart(locales[lang].games, "package_games")
-	menuItems(apps, "Game")
+	menuItems(apps, "Game X-Fun")
 print("}")
 
 -- Multimedia/Audio/Video

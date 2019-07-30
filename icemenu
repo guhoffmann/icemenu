@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.7.19-1"
+local appname = "Icemenu 30.7.19-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -22,7 +22,7 @@ local locales = {
 			science = "Wissenschaft", education = "Erziehung", network = "Netzwerk", settings = "Einstellungen",
 			desktop = "Desktop", hardware = "Hardware", all = "Alle", system = "System",
 			filesystem = "Dateisystem", safety = "Sicherheit/Monitoring", terminals = "Terminals",
-			tools = "Werkzeuge" 
+			tools = "Werkzeuge", mywebsite = "Uwes Info-Seite"
 			},
 	en = {exit = "Exit", logout = "Logout", reboot = "Reboot", poweroff = "Power off",
 			terminal = "Terminal", appfinder = "AppFinder", development = "Development",
@@ -30,7 +30,7 @@ local locales = {
 			science = "Science", education = "Education", network = "Network", settings = "Settings",
 			desktop = "Desktop", hardware = "Hardware", all = "All", system = "System",
 			filesystem = "Filesystem", safety = "Safety/Monitoring", terminals = "Terminals",
-			tools = "Tools" 
+			tools = "Tools", mywebsite = "Uwes Info-Page" 
 			}
 }
 
@@ -241,6 +241,8 @@ print("}")
 print("separator")
 print("prog \""..locales[lang].terminal.."\" "..findIcon("konsole.png").." lxterminal");--io.stderr:write("Gefunden: "..findIcon("reload"))
 print("prog \""..locales[lang].appfinder.."\" "..findIcon("edit-find").." xfce4-appfinder")
+print("prog \""..locales[lang].mywebsite.."\" "..findIcon("help").." /root/mywebsite/show.sh")
+print("prog \""..locales[lang].mywebsite.."\" "..findIcon("help").." /home/uwe/MyDevelop/MyWeb/mywebsite/show.sh")
 --print("prog \"Menü aktualisieren\" "..findIcon("view-refresh").." x-terminal-emulator -e \"icemenu -c >~/.icewm/menu\"")
 print("separator")
 

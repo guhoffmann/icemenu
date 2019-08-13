@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 30.7.19-1"
+local appname = "Icemenu 19.08.13-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -248,7 +248,7 @@ print("separator")
 
 -- Entwicklung
 menuStart(locales[lang].development, "package_development")
-	menuItems(apps, "Development")
+	menuItems(apps, "Development X-Utility-development TextEditor")
 print("}")
 
 -- Grafik
@@ -263,7 +263,7 @@ print("}")
 
 -- Multimedia/Audio/Video
 menuStart(locales[lang].multimedia, "package_multimedia")
-	menuItems(apps, "AudioVideo Video Audio")
+	menuItems(apps, "AudioVideo Video Audio Music")
 print("}")
 
 -- Office

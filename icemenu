@@ -268,17 +268,17 @@ out("separator")
 
 -- Entwicklung
 menuStart(locales[lang].development, "package_development")
-	menuItems(apps, "Development X-Utility-development TextEditor")
+	menuItems(apps, "Development X%-Utility%-development TextEditor")
 out("}")
 
 -- Grafik
 menuStart(locales[lang].graphics, "package_graphics")
-	menuItems(apps, "Graphics Viewer X-GraphicUtility")
+	menuItems(apps, "Graphics X%-Graphic%-viewer Viewer X%-GraphicUtility")
 out("}")
 
 -- Spiele
 menuStart(locales[lang].games, "package_games")
-	menuItems(apps, "Game X-Fun")
+	menuItems(apps, "Game X%-Fun")
 out("}")
 
 -- Multimedia/Audio/Video
@@ -303,7 +303,7 @@ out("}")
 
 -- Netzwerk
 menuStart(locales[lang].network, "nm-device-wireless")
-	menuItems(apps, "Network WebBrowser X-Internet")
+	menuItems(apps, "Network WebBrowser X%-Internet")
 out("}")
 
 -- Einstellungen

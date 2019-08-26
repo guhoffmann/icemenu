@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.08.14-1"
+local appname = "Icemenu 19.08.14-2"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
@@ -58,6 +58,7 @@ Available options are:
 -l language   make menu in language given (de,en)
 -o directory  put output to file directory/menu
 -r directory  root directory for icon and application search
+-w            write menu file to $HOME/.icewm/menu
 
 [appsDir] ist the directory where to search application desktop files, defaults to /usr/share/applications.
 If option '-r' is given, applications and icons are searched in a directory tree starting at the given directory.
@@ -272,7 +273,7 @@ out("}")
 
 -- Grafik
 menuStart(locales[lang].graphics, "package_graphics")
-	menuItems(apps, "Graphics X-GraphicUtility")
+	menuItems(apps, "Graphics Viewer X-GraphicUtility")
 out("}")
 
 -- Spiele
@@ -297,12 +298,12 @@ out("}")
 
 -- Erziehung
 menuStart(locales[lang].education, "applications-education")
-	menuItems(apps, "Science")
+	menuItems(apps, "Education Edutainment")
 out("}")
 
 -- Netzwerk
 menuStart(locales[lang].network, "nm-device-wireless")
-	menuItems(apps, "Network WebBrowser X%-Internet")
+	menuItems(apps, "Network WebBrowser X-Internet")
 out("}")
 
 -- Einstellungen

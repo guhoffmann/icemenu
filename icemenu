@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.08.14-2"
+local appname = "Icemenu 19.08.26-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32",
 	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",

@@ -1,13 +1,11 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.08.26-1"
+local appname = "Icemenu 19.09.30-1"
 local iconDirs = {
-	"/usr/share/icons/gnome/32x32",
-	"/usr/share/icons/hicolor/32x32", "/usr/share/icons/hicolor/48x48/",
-	"/usr/share/icons/hicolor", "/usr/share/icons/Puppy Flat/32/",
-	"/usr/share/pixmaps", "/usr/share/games", "/usr/share/app-install/icons",
-	"/usr/share/icons/Mint-X/apps/32/",	"/usr/share/icons/hicolor/scalable",
-	"/usr/share/icewm/icons", "usr/share/icewm/icons/menuitems"
+	"/usr/share/icons/gnome/32x32","/usr/share/icons/hicolor/32x32","/usr/share/icons/hicolor/48x48/",
+	"/usr/share/icons/hicolor","/usr/share/icons/Puppy Flat/32/","/usr/share/icons/Puppy Standard/",
+	"/usr/share/pixmaps","/usr/share/games","/usr/share/app-install/icons","/usr/share/icons/Mint-X/apps/32/",
+	"/usr/share/icons/hicolor/scalable","/usr/share/icewm/icons","usr/share/icewm/icons/menuitems"
 }
 local rootBase="" -- Base dir for icon search
 local iconTable = {}

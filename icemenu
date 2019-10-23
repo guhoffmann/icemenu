@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.09.30-1"
+local appname = "Icemenu 19.10.23-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32","/usr/share/icons/hicolor/32x32","/usr/share/icons/hicolor/48x48/",
 	"/usr/share/icons/hicolor","/usr/share/icons/Puppy Flat/32/","/usr/share/icons/Puppy Standard/",
@@ -281,7 +281,7 @@ out("}")
 
 -- Multimedia/Audio/Video
 menuStart(locales[lang].multimedia, "package_multimedia")
-	menuItems(apps, "AudioVideo Video Audio Music")
+	menuItems(apps, "AudioVideo Video Audio Multimedia Music")
 out("}")
 
 -- Office

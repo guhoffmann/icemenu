@@ -301,7 +301,7 @@ out("}")
 
 -- Netzwerk
 menuStart(locales[lang].network, "nm-device-wireless")
-	menuItems(apps, "Network WebBrowser X%-Internet")
+	menuItems(apps, "Email Network WebBrowser X%-Internet")
 out("}")
 
 -- Einstellungen

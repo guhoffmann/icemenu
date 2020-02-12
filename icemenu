@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-local appname = "Icemenu 19.10.23-1"
+local appname = "Icemenu 20.2.12-1"
 local iconDirs = {
 	"/usr/share/icons/gnome/32x32","/usr/share/icons/hicolor/32x32","/usr/share/icons/hicolor/48x48/",
 	"/usr/share/icons/hicolor","/usr/share/icons/Puppy Flat/32/","/usr/share/icons/Puppy Standard/",
@@ -313,8 +313,9 @@ menuStart(locales[lang].settings, "preferences-other")
 		menuItems(apps, "HardwareSettings")
 	out("}")
 	menuStart(locales[lang].all, "preferences-other")
-		menuItems(apps, "Settings X%-Setup%-puppy")
+		-- menuItems(apps, "Settings X%-Setup%-puppy")
 	out("}")
+	menuItems(apps, "Settings X%-Setup%-puppy")
 out("}")
 
 -- System
